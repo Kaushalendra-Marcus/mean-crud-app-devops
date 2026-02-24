@@ -1,0 +1,1261 @@
+
+
+===== FILE: ./frontend/src/styles.css =====
+
+/* You can add global styles to this file, and also import other style files */
+@import "~bootstrap/dist/css/bootstrap.css";
+
+===== FILE: ./frontend/src/app/app.module.ts =====
+
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { AddTutorialComponent } from './components/add-tutorial/add-tutorial.component';
+import { TutorialDetailsComponent } from './components/tutorial-details/tutorial-details.component';
+import { TutorialsListComponent } from './components/tutorials-list/tutorials-list.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    AddTutorialComponent,
+    TutorialDetailsComponent,
+    TutorialsListComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    FormsModule,
+    HttpClientModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+
+===== FILE: ./frontend/src/app/app-routing.module.ts =====
+
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { TutorialsListComponent } from './components/tutorials-list/tutorials-list.component';
+import { TutorialDetailsComponent } from './components/tutorial-details/tutorial-details.component';
+import { AddTutorialComponent } from './components/add-tutorial/add-tutorial.component';
+
+const routes: Routes = [
+  { path: '', redirectTo: 'tutorials', pathMatch: 'full' },
+  { path: 'tutorials', component: TutorialsListComponent },
+  { path: 'tutorials/:id', component: TutorialDetailsComponent },
+  { path: 'add', component: AddTutorialComponent }
+];
+
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+
+===== FILE: ./frontend/src/app/app.component.spec.ts =====
+
+import { TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { AppComponent } from './app.component';
+
+describe('AppComponent', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        RouterTestingModule
+      ],
+      declarations: [
+        AppComponent
+      ],
+    }).compileComponents();
+  });
+
+  it('should create the app', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    expect(app).toBeTruthy();
+  });
+
+  it(`should have as title 'angular-15-crud'`, () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    expect(app.title).toEqual('angular-15-crud');
+  });
+
+  it('should render title', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.content span')?.textContent).toContain('angular-15-crud app is running!');
+  });
+});
+
+
+===== FILE: ./frontend/src/app/app.component.ts =====
+
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent {
+  title = 'Angular 15 CRUD example';
+}
+
+
+===== FILE: ./frontend/src/app/models/tutorial.model.ts =====
+
+export class Tutorial {
+  id?: any;
+  title?: string;
+  description?: string;
+  published?: boolean;
+}
+
+===== FILE: ./frontend/src/app/models/tutorial.model.spec.ts =====
+
+import { Tutorial } from './tutorial.model';
+
+describe('Tutorial', () => {
+  it('should create an instance', () => {
+    expect(new Tutorial()).toBeTruthy();
+  });
+});
+
+
+===== FILE: ./frontend/src/app/app.component.html =====
+
+<div>
+  <nav class="navbar navbar-expand navbar-dark bg-dark">
+    <a href="#" class="navbar-brand">DD Task</a>
+    <div class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a routerLink="tutorials" class="nav-link">Tutorials</a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="add" class="nav-link">Add</a>
+      </li>
+    </div>
+  </nav>
+
+  <div class="container mt-3">
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+
+===== FILE: ./frontend/src/app/app.component.css =====
+
+
+
+===== FILE: ./frontend/src/app/services/tutorial.service.spec.ts =====
+
+import { TestBed } from '@angular/core/testing';
+
+import { TutorialService } from './tutorial.service';
+
+describe('TutorialService', () => {
+  let service: TutorialService;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(TutorialService);
+  });
+
+  it('should be created', () => {
+    expect(service).toBeTruthy();
+  });
+});
+
+
+===== FILE: ./frontend/src/app/services/tutorial.service.ts =====
+
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Tutorial } from '../models/tutorial.model';
+
+const baseUrl = 'http://localhost:8080/api/tutorials';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class TutorialService {
+
+  constructor(private http: HttpClient) { }
+
+  getAll(): Observable<Tutorial[]> {
+    return this.http.get<Tutorial[]>(baseUrl);
+  }
+
+  get(id: any): Observable<Tutorial> {
+    return this.http.get<Tutorial>(`${baseUrl}/${id}`);
+  }
+
+  create(data: any): Observable<any> {
+    return this.http.post(baseUrl, data);
+  }
+
+  update(id: any, data: any): Observable<any> {
+    return this.http.put(`${baseUrl}/${id}`, data);
+  }
+
+  delete(id: any): Observable<any> {
+    return this.http.delete(`${baseUrl}/${id}`);
+  }
+
+  deleteAll(): Observable<any> {
+    return this.http.delete(baseUrl);
+  }
+
+  findByTitle(title: any): Observable<Tutorial[]> {
+    return this.http.get<Tutorial[]>(`${baseUrl}?title=${title}`);
+  }
+}
+
+===== FILE: ./frontend/src/app/components/tutorials-list/tutorials-list.component.ts =====
+
+import { Component, OnInit } from '@angular/core';
+import { Tutorial } from 'src/app/models/tutorial.model';
+import { TutorialService } from 'src/app/services/tutorial.service';
+
+@Component({
+  selector: 'app-tutorials-list',
+  templateUrl: './tutorials-list.component.html',
+  styleUrls: ['./tutorials-list.component.css']
+})
+export class TutorialsListComponent implements OnInit {
+
+  tutorials?: Tutorial[];
+  currentTutorial: Tutorial = {};
+  currentIndex = -1;
+  title = '';
+
+  constructor(private tutorialService: TutorialService) { }
+
+  ngOnInit(): void {
+    this.retrieveTutorials();
+  }
+
+  retrieveTutorials(): void {
+    this.tutorialService.getAll()
+      .subscribe({
+        next: (data) => {
+          this.tutorials = data;
+          console.log(data);
+        },
+        error: (e) => console.error(e)
+      });
+  }
+
+  refreshList(): void {
+    this.retrieveTutorials();
+    this.currentTutorial = {};
+    this.currentIndex = -1;
+  }
+
+  setActiveTutorial(tutorial: Tutorial, index: number): void {
+    this.currentTutorial = tutorial;
+    this.currentIndex = index;
+  }
+
+  removeAllTutorials(): void {
+    this.tutorialService.deleteAll()
+      .subscribe({
+        next: (res) => {
+          console.log(res);
+          this.refreshList();
+        },
+        error: (e) => console.error(e)
+      });
+  }
+
+  searchTitle(): void {
+    this.currentTutorial = {};
+    this.currentIndex = -1;
+
+    this.tutorialService.findByTitle(this.title)
+      .subscribe({
+        next: (data) => {
+          this.tutorials = data;
+          console.log(data);
+        },
+        error: (e) => console.error(e)
+      });
+  }
+
+}
+
+===== FILE: ./frontend/src/app/components/tutorials-list/tutorials-list.component.spec.ts =====
+
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { TutorialsListComponent } from './tutorials-list.component';
+
+describe('TutorialsListComponent', () => {
+  let component: TutorialsListComponent;
+  let fixture: ComponentFixture<TutorialsListComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ TutorialsListComponent ]
+    })
+    .compileComponents();
+
+    fixture = TestBed.createComponent(TutorialsListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+
+
+===== FILE: ./frontend/src/app/components/tutorials-list/tutorials-list.component.html =====
+
+<div class="list row">
+  <div class="col-md-8">
+    <div class="input-group mb-3">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Search by title"
+        [(ngModel)]="title"
+      />
+      <div class="input-group-append">
+        <button
+          class="btn btn-outline-secondary"
+          (click)="searchTitle()"
+        >
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <h4>Tutorials List</h4>
+    <ul class="list-group">
+      <li
+        class="list-group-item"
+        *ngFor="let tutorial of tutorials; let i = index"
+        [class.active]="i == currentIndex"
+        (click)="setActiveTutorial(tutorial, i)"
+      >
+        {{ tutorial.title }}
+      </li>
+    </ul>
+
+    <button class="m-3 btn btn-sm btn-danger" (click)="removeAllTutorials()">
+      Remove All
+    </button>
+  </div>
+  <div class="col-md-6">
+    <app-tutorial-details
+      [viewMode]="true"
+      [currentTutorial]="currentTutorial"
+    ></app-tutorial-details>
+  </div>
+</div>
+
+
+===== FILE: ./frontend/src/app/components/tutorials-list/tutorials-list.component.css =====
+
+.list {
+  text-align: left;
+  max-width: 750px;
+  margin: auto;
+}
+
+===== FILE: ./frontend/src/app/components/tutorial-details/tutorial-details.component.spec.ts =====
+
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { TutorialDetailsComponent } from './tutorial-details.component';
+
+describe('TutorialDetailsComponent', () => {
+  let component: TutorialDetailsComponent;
+  let fixture: ComponentFixture<TutorialDetailsComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ TutorialDetailsComponent ]
+    })
+    .compileComponents();
+
+    fixture = TestBed.createComponent(TutorialDetailsComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+
+
+===== FILE: ./frontend/src/app/components/tutorial-details/tutorial-details.component.html =====
+
+<div *ngIf="viewMode; else editable">
+  <div *ngIf="currentTutorial.id">
+    <h4>Tutorial</h4>
+    <div>
+      <label><strong>Title:</strong></label> {{ currentTutorial.title }}
+    </div>
+    <div>
+      <label><strong>Description:</strong></label>
+      {{ currentTutorial.description }}
+    </div>
+    <div>
+      <label><strong>Status:</strong></label>
+      {{ currentTutorial.published ? "Published" : "Pending" }}
+    </div>
+
+    <a
+      class="badge badge-warning"
+      routerLink="/tutorials/{{ currentTutorial.id }}"
+    >
+      Edit
+    </a>
+  </div>
+
+  <div *ngIf="!currentTutorial">
+    <br />
+    <p>Please click on a Tutorial...</p>
+  </div>
+</div>
+
+<ng-template #editable>
+  <div *ngIf="currentTutorial.id" class="edit-form">
+    <h4>Tutorial</h4>
+    <form>
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input
+          type="text"
+          class="form-control"
+          id="title"
+          [(ngModel)]="currentTutorial.title"
+          name="title"
+        />
+      </div>
+      <div class="form-group">
+        <label for="description">Description</label>
+        <input
+          type="text"
+          class="form-control"
+          id="description"
+          [(ngModel)]="currentTutorial.description"
+          name="description"
+        />
+      </div>
+
+      <div class="form-group">
+        <label><strong>Status:</strong></label>
+        {{ currentTutorial.published ? "Published" : "Pending" }}
+      </div>
+    </form>
+
+    <button
+      class="badge badge-primary mr-2"
+      *ngIf="currentTutorial.published"
+      (click)="updatePublished(false)"
+    >
+      UnPublish
+    </button>
+    <button
+      *ngIf="!currentTutorial.published"
+      class="badge badge-primary mr-2"
+      (click)="updatePublished(true)"
+    >
+      Publish
+    </button>
+
+    <button class="badge badge-danger mr-2" (click)="deleteTutorial()">
+      Delete
+    </button>
+
+    <button
+      type="submit"
+      class="badge badge-success mb-2"
+      (click)="updateTutorial()"
+    >
+      Update
+    </button>
+    <p>{{ message }}</p>
+  </div>
+
+  <div *ngIf="!currentTutorial.id">
+    <br />
+    <p>Cannot access this Tutorial...</p>
+  </div>
+</ng-template>
+
+
+===== FILE: ./frontend/src/app/components/tutorial-details/tutorial-details.component.ts =====
+
+import { Component, Input, OnInit } from '@angular/core';
+import { TutorialService } from 'src/app/services/tutorial.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Tutorial } from 'src/app/models/tutorial.model';
+
+@Component({
+  selector: 'app-tutorial-details',
+  templateUrl: './tutorial-details.component.html',
+  styleUrls: ['./tutorial-details.component.css']
+})
+export class TutorialDetailsComponent implements OnInit {
+
+  @Input() viewMode = false;
+
+  @Input() currentTutorial: Tutorial = {
+    title: '',
+    description: '',
+    published: false
+  };
+  
+  message = '';
+
+  constructor(
+    private tutorialService: TutorialService,
+    private route: ActivatedRoute,
+    private router: Router) { }
+
+  ngOnInit(): void {
+    if (!this.viewMode) {
+      this.message = '';
+      this.getTutorial(this.route.snapshot.params["id"]);
+    }
+  }
+
+  getTutorial(id: string): void {
+    this.tutorialService.get(id)
+      .subscribe({
+        next: (data) => {
+          this.currentTutorial = data;
+          console.log(data);
+        },
+        error: (e) => console.error(e)
+      });
+  }
+
+  updatePublished(status: boolean): void {
+    const data = {
+      title: this.currentTutorial.title,
+      description: this.currentTutorial.description,
+      published: status
+    };
+
+    this.message = '';
+
+    this.tutorialService.update(this.currentTutorial.id, data)
+      .subscribe({
+        next: (res) => {
+          console.log(res);
+          this.currentTutorial.published = status;
+          this.message = res.message ? res.message : 'The status was updated successfully!';
+        },
+        error: (e) => console.error(e)
+      });
+  }
+
+  updateTutorial(): void {
+    this.message = '';
+
+    this.tutorialService.update(this.currentTutorial.id, this.currentTutorial)
+      .subscribe({
+        next: (res) => {
+          console.log(res);
+          this.message = res.message ? res.message : 'This tutorial was updated successfully!';
+        },
+        error: (e) => console.error(e)
+      });
+  }
+
+  deleteTutorial(): void {
+    this.tutorialService.delete(this.currentTutorial.id)
+      .subscribe({
+        next: (res) => {
+          console.log(res);
+          this.router.navigate(['/tutorials']);
+        },
+        error: (e) => console.error(e)
+      });
+  }
+
+}
+
+===== FILE: ./frontend/src/app/components/tutorial-details/tutorial-details.component.css =====
+
+.edit-form {
+  max-width: 400px;
+  margin: auto;
+}
+
+===== FILE: ./frontend/src/app/components/add-tutorial/add-tutorial.component.ts =====
+
+import { Component } from '@angular/core';
+import { Tutorial } from 'src/app/models/tutorial.model';
+import { TutorialService } from 'src/app/services/tutorial.service';
+
+@Component({
+  selector: 'app-add-tutorial',
+  templateUrl: './add-tutorial.component.html',
+  styleUrls: ['./add-tutorial.component.css']
+})
+export class AddTutorialComponent {
+
+  tutorial: Tutorial = {
+    title: '',
+    description: '',
+    published: false
+  };
+  submitted = false;
+
+  constructor(private tutorialService: TutorialService) { }
+
+  saveTutorial(): void {
+    const data = {
+      title: this.tutorial.title,
+      description: this.tutorial.description
+    };
+
+    this.tutorialService.create(data)
+      .subscribe({
+        next: (res) => {
+          console.log(res);
+          this.submitted = true;
+        },
+        error: (e) => console.error(e)
+      });
+  }
+
+  newTutorial(): void {
+    this.submitted = false;
+    this.tutorial = {
+      title: '',
+      description: '',
+      published: false
+    };
+  }
+
+}
+
+===== FILE: ./frontend/src/app/components/add-tutorial/add-tutorial.component.spec.ts =====
+
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
+import { AddTutorialComponent } from './add-tutorial.component';
+
+describe('AddTutorialComponent', () => {
+  let component: AddTutorialComponent;
+  let fixture: ComponentFixture<AddTutorialComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ AddTutorialComponent ]
+    })
+    .compileComponents();
+
+    fixture = TestBed.createComponent(AddTutorialComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+});
+
+
+===== FILE: ./frontend/src/app/components/add-tutorial/add-tutorial.component.css =====
+
+.submit-form {
+  max-width: 400px;
+  margin: auto;
+}
+
+===== FILE: ./frontend/src/app/components/add-tutorial/add-tutorial.component.html =====
+
+<div>
+  <div class="submit-form">
+    <div *ngIf="!submitted">
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input
+          type="text"
+          class="form-control"
+          id="title"
+          required
+          [(ngModel)]="tutorial.title"
+          name="title"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description</label>
+        <input
+          class="form-control"
+          id="description"
+          required
+          [(ngModel)]="tutorial.description"
+          name="description"
+        />
+      </div>
+
+      <button (click)="saveTutorial()" class="btn btn-success">Submit</button>
+    </div>
+
+    <div *ngIf="submitted">
+      <h4>Tutorial was submitted successfully!</h4>
+      <button class="btn btn-success" (click)="newTutorial()">Add</button>
+    </div>
+  </div>
+</div>
+
+
+===== FILE: ./frontend/src/main.ts =====
+
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+
+import { AppModule } from './app/app.module';
+
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+  .catch(err => console.error(err));
+
+
+===== FILE: ./frontend/src/index.html =====
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DD Task</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>
+
+
+===== FILE: ./frontend/tsconfig.json =====
+
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "useDefineForClassFields": false,
+    "lib": [
+      "ES2022",
+      "dom"
+    ]
+  },
+  "angularCompilerOptions": {
+    "enableI18nLegacyMessageIdFormat": false,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true,
+    "strictTemplates": true
+  }
+}
+
+
+===== FILE: ./frontend/tsconfig.spec.json =====
+
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/spec",
+    "types": [
+      "jasmine"
+    ]
+  },
+  "include": [
+    "src/**/*.spec.ts",
+    "src/**/*.d.ts"
+  ]
+}
+
+
+===== FILE: ./frontend/tsconfig.app.json =====
+
+/* To learn more about this file see: https://angular.io/config/tsconfig. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": []
+  },
+  "files": [
+    "src/main.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
+}
+
+
+===== FILE: ./frontend/angular.json =====
+
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "angular-15-crud": {
+      "projectType": "application",
+      "schematics": {},
+      "root": "",
+      "sourceRoot": "src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/angular-15-crud",
+            "index": "src/index.html",
+            "main": "src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "tsconfig.app.json",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.css"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "browserTarget": "angular-15-crud:build:production"
+            },
+            "development": {
+              "browserTarget": "angular-15-crud:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "angular-15-crud:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles.css"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    }
+  }
+}
+
+
+===== FILE: ./frontend/package.json =====
+
+{
+  "name": "angular-15-crud",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^15.0.0",
+    "@angular/common": "^15.0.0",
+    "@angular/compiler": "^15.0.0",
+    "@angular/core": "^15.0.0",
+    "@angular/forms": "^15.0.0",
+    "@angular/platform-browser": "^15.0.0",
+    "@angular/platform-browser-dynamic": "^15.0.0",
+    "@angular/router": "^15.0.0",
+    "bootstrap": "^4.6.2",
+    "rxjs": "~7.5.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.12.0"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^15.0.3",
+    "@angular/cli": "~15.0.3",
+    "@angular/compiler-cli": "^15.0.0",
+    "@types/jasmine": "~4.3.0",
+    "jasmine-core": "~4.5.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.1.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.0.0",
+    "typescript": "~4.8.2"
+  }
+}
+
+
+===== FILE: ./backend/app/models/tutorial.model.js =====
+
+module.exports = mongoose => {
+  var schema = mongoose.Schema(
+    {
+      title: String,
+      description: String,
+      published: Boolean
+    },
+    { timestamps: true }
+  );
+
+  schema.method("toJSON", function() {
+    const { __v, _id, ...object } = this.toObject();
+    object.id = _id;
+    return object;
+  });
+
+  const Tutorial = mongoose.model("tutorial", schema);
+  return Tutorial;
+};
+
+
+===== FILE: ./backend/app/models/index.js =====
+
+const dbConfig = require("../config/db.config.js");
+
+const mongoose = require("mongoose");
+mongoose.Promise = global.Promise;
+
+const db = {};
+db.mongoose = mongoose;
+db.url = dbConfig.url;
+db.tutorials = require("./tutorial.model.js")(mongoose);
+
+module.exports = db;
+
+
+===== FILE: ./backend/app/routes/turorial.routes.js =====
+
+module.exports = app => {
+  const tutorials = require("../controllers/tutorial.controller.js");
+
+  var router = require("express").Router();
+
+  // Create a new Tutorial
+  router.post("/", tutorials.create);
+
+  // Retrieve all Tutorials
+  router.get("/", tutorials.findAll);
+
+  // Retrieve all published Tutorials
+  router.get("/published", tutorials.findAllPublished);
+
+  // Retrieve a single Tutorial with id
+  router.get("/:id", tutorials.findOne);
+
+  // Update a Tutorial with id
+  router.put("/:id", tutorials.update);
+
+  // Delete a Tutorial with id
+  router.delete("/:id", tutorials.delete);
+
+  // Create a new Tutorial
+  router.delete("/", tutorials.deleteAll);
+
+  app.use("/api/tutorials", router);
+};
+
+
+===== FILE: ./backend/app/controllers/tutorial.controller.js =====
+
+const db = require("../models");
+const Tutorial = db.tutorials;
+
+// Create and Save a new Tutorial
+exports.create = (req, res) => {
+  // Validate request
+  if (!req.body.title) {
+    res.status(400).send({ message: "Content can not be empty!" });
+    return;
+  }
+
+  // Create a Tutorial
+  const tutorial = new Tutorial({
+    title: req.body.title,
+    description: req.body.description,
+    published: req.body.published ? req.body.published : false
+  });
+
+  // Save Tutorial in the database
+  tutorial
+    .save(tutorial)
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while creating the Tutorial."
+      });
+    });
+};
+
+// Retrieve all Tutorials from the database.
+exports.findAll = (req, res) => {
+  const title = req.query.title;
+  var condition = title ? { title: { $regex: new RegExp(title), $options: "i" } } : {};
+
+  Tutorial.find(condition)
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving tutorials."
+      });
+    });
+};
+
+// Find a single Tutorial with an id
+exports.findOne = (req, res) => {
+  const id = req.params.id;
+
+  Tutorial.findById(id)
+    .then(data => {
+      if (!data)
+        res.status(404).send({ message: "Not found Tutorial with id " + id });
+      else res.send(data);
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .send({ message: "Error retrieving Tutorial with id=" + id });
+    });
+};
+
+// Update a Tutorial by the id in the request
+exports.update = (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to update can not be empty!"
+    });
+  }
+
+  const id = req.params.id;
+
+  Tutorial.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
+    .then(data => {
+      if (!data) {
+        res.status(404).send({
+          message: `Cannot update Tutorial with id=${id}. Maybe Tutorial was not found!`
+        });
+      } else res.send({ message: "Tutorial was updated successfully." });
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Error updating Tutorial with id=" + id
+      });
+    });
+};
+
+// Delete a Tutorial with the specified id in the request
+exports.delete = (req, res) => {
+  const id = req.params.id;
+
+  Tutorial.findByIdAndRemove(id, { useFindAndModify: false })
+    .then(data => {
+      if (!data) {
+        res.status(404).send({
+          message: `Cannot delete Tutorial with id=${id}. Maybe Tutorial was not found!`
+        });
+      } else {
+        res.send({
+          message: "Tutorial was deleted successfully!"
+        });
+      }
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Could not delete Tutorial with id=" + id
+      });
+    });
+};
+
+// Delete all Tutorials from the database.
+exports.deleteAll = (req, res) => {
+  Tutorial.deleteMany({})
+    .then(data => {
+      res.send({
+        message: `${data.deletedCount} Tutorials were deleted successfully!`
+      });
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while removing all tutorials."
+      });
+    });
+};
+
+// Find all published Tutorials
+exports.findAllPublished = (req, res) => {
+  Tutorial.find({ published: true })
+    .then(data => {
+      res.send(data);
+    })
+    .catch(err => {
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while retrieving tutorials."
+      });
+    });
+};
+
+
+===== FILE: ./backend/app/config/db.config.js =====
+
+module.exports = {
+  url: "mongodb://localhost:27017/dd_db"
+};
+
+
+===== FILE: ./backend/package.json =====
+
+{
+  "name": "node-express-mongodb",
+  "version": "1.0.0",
+  "description": "Node.js Restful CRUD API with Node.js, Express and MongoDB",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "rest",
+    "api",
+    "mongodb"
+  ],
+  "author": "bezkoder",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "mongoose": "^6.8.1"
+  }
+}
+
+
+===== FILE: ./backend/server.js =====
+
+const express = require("express");
+//const cors = require("cors");
+
+const app = express();
+
+// parse requests of content-type - application/json
+app.use(express.json());
+
+// parse requests of content-type - application/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: true }));
+
+const db = require("./app/models");
+db.mongoose
+  .connect(db.url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => {
+    console.log("Connected to the database!");
+  })
+  .catch(err => {
+    console.log("Cannot connect to the database!", err);
+    process.exit();
+  });
+
+// simple route
+app.get("/", (req, res) => {
+  res.json({ message: "Welcome to Test application." });
+});
+
+require("./app/routes/turorial.routes")(app);
+
+// set port, listen for requests
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}.`);
+});
